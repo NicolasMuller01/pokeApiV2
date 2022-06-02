@@ -22,16 +22,18 @@ const llamarPokemones = async(url)=>{
 }
 
 window.addEventListener('DOMContentLoaded', async()=>{
-    const pokemon = await fetch(twentyList);
+    const pokemon = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20&offset=0');
     const pokemonJson = await pokemon.json()
     const {next} = pokemonJson;
     globalNext = next;
     const arr = pokemonJson.results.map(item => ({
         url:item.url
     }))
-    arr.forEach(async(element) => {
-      await llamarPokemones(element.url);
-    });
+    await Promise.all(
+        arr.forEach(async(element) => {
+            await llamarPokemones(element.url);
+          })
+    )
 })
 
 form.addEventListener('submit',async(e)=>{
@@ -39,9 +41,9 @@ form.addEventListener('submit',async(e)=>{
 try{
     const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${input.value}`);
     const pokemonJson = await pokemon.json()
-    const {name,base_experience,abilities,sprites} = pokemonJson;
+    const {id,name,base_experience,abilities,sprites} = pokemonJson;
     return div.innerHTML = 
-    `<div class="renderConteiner">
+    `<div class="renderConteiner ${id}">
         <img class="pokemon-img" src="${sprites.front_default}"></img>
         <p>Name: ${name}</p>
         <p>Base experience: ${base_experience}</p>
@@ -57,6 +59,7 @@ catch(err){
 });
 
 btnNext.addEventListener('click', async()=>{
+ try {
     div.innerHTML = "";
     const pokemon = await fetch(globalNext);
     const pokemonJson = await pokemon.json()
@@ -69,6 +72,20 @@ btnNext.addEventListener('click', async()=>{
     arr.forEach(async(element) => {
       await llamarPokemones(element.url);
     });
+ } catch (error) {
+    const pokemon = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20&offset=0');
+    const pokemonJson = await pokemon.json()
+    const {next} = pokemonJson;
+    globalNext = next;
+    const arr = pokemonJson.results.map(item => ({
+        url:item.url
+    }))
+    await Promise.all(
+        arr.forEach(async(element) => {
+            await llamarPokemones(element.url);
+          })
+    )
+ }
 })
 
 btnPrevious.addEventListener('click', async()=>{
@@ -82,19 +99,24 @@ btnPrevious.addEventListener('click', async()=>{
     const arr = pokemonJson.results.map(item => ({
         url:item.url
     }))
-    arr.forEach(async(element) => {
-      await llamarPokemones(element.url);
-    });
-  } catch (error) {
-    const pokemon = await fetch(twentyList);
+    await Promise.all(
+        arr.forEach(async(element) => {
+            await llamarPokemones(element.url);
+          })
+    )
+  } 
+  catch (error) {
+    const pokemon = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20&offset=0');
     const pokemonJson = await pokemon.json()
     const {next} = pokemonJson;
     globalNext = next;
     const arr = pokemonJson.results.map(item => ({
         url:item.url
     }))
-    arr.forEach(async(element) => {
-      await llamarPokemones(element.url);
-    }); 
+    await Promise.all(
+        arr.forEach(async(element) => {
+            await llamarPokemones(element.url);
+          })
+    )
   }
 })
